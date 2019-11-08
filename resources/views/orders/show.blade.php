@@ -50,7 +50,7 @@
 
                       <td class="quantity">
                         <div class="input-group mb-3">
-                          <input type="text" name="quantity" class="quantity form-control input-number" value="{{ $product->pivot->quantity }}" min="1" max="100">
+                          <input type="text" name="quantity" class="quantity form-control input-number" data-quantity="{{ $product->pivot->quantity }}" value="{{ $product->pivot->quantity }}" min="1" max="100">
                         </div>
                       </td>
 
@@ -110,6 +110,9 @@
         if (confirm('Delete this product, are you sure?')) {
           var url = '/orders/delete';
           var productId = $(this).data('product-id');
+          var numberProductDestroy = $(this).parent().find('input').val();
+          var cartNumber = $('.cart-number').text();
+          var currentNumberProduct = cartNumber.text().substr(1, cartNumber.length - 2);
 
           var data = {
             'product_id': productId
@@ -123,6 +126,8 @@
               if (result.status) {
                 $('.product-' + productId).remove();
                 $('.show-total-price').text('$' + result.total_price);
+                // $('.cart-number').text('[' + result.product_quantity + ']');
+                $('.cart-number').text('[' + currentNumberProduct - numberProductDestroy + ']');
               }
             },
             error: function() {
@@ -132,6 +137,33 @@
           });
         }
       });
+
+      $('.input-number').change(function() {
+        if (confirm('Change quantity this product, are you sure?')) {
+            var url = 'order/update';
+            var productId = $(this).closest('.text-center').data('product-id');
+            var data = {
+                'product_id': productId,
+                'quantity': $(this).val()
+            };
+            $.ajax({
+                url: url,
+                type: 'POST',
+                data: data,
+                success: function(result) {
+                  if (result.status) {
+                    $('.show-total-price').text('$' + result.total_price);
+                  }
+                },
+                error: function() {
+                    alert('Some went wrong!');
+                    location.reload();
+                }
+            });
+          }
+        });
+
+
     });
   </script>
 @endsection
